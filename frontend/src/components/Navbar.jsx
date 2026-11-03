@@ -72,26 +72,26 @@ export default function Navbar() {
         <div className="navbar-right">
           {isAuthenticated ? (
             <>
-              <span className="user-info" style={{ color: 'var(--gray-300)' }}>
-                👤 {user?.name || user?.full_name || user?.email?.split('@')[0] || 'User'}
+              <span className="user-info">
+                <span>👤</span> {user?.full_name || user?.name || user?.email?.split('@')[0] || 'User'}
               </span>
               {isCustomer && (
                 <Link to="/cart" className="cart-btn" onClick={closeMenu}>
-                  🛒
+                  <span>🛒</span> Cart
                   {cartCount > 0 && (
                     <span className="cart-badge">{cartCount}</span>
                   )}
                 </Link>
               )}
               <button className="btn btn-sm btn-ghost" onClick={handleLogout}
-                style={{ color: 'var(--gray-300)', borderColor: 'var(--gray-600)' }}>
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--gray-200)', borderColor: 'rgba(255,255,255,0.15)' }}>
                 Logout
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className="btn btn-sm btn-ghost"
-                style={{ color: 'var(--gray-300)', borderColor: 'var(--gray-600)' }}
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--gray-200)', borderColor: 'rgba(255,255,255,0.15)' }}
                 onClick={closeMenu}>
                 Login
               </Link>
@@ -101,6 +101,7 @@ export default function Navbar() {
             </>
           )}
         </div>
+
       </div>
     </nav>
   )

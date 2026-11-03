@@ -24,3 +24,8 @@ class MenuItem(Base):
     # Relationships
     restaurant = relationship("Restaurant", back_populates="menu_items")
     order_items = relationship("OrderItem", back_populates="menu_item")
+
+    @property
+    def image(self) -> str | None:
+        return self.image_url
+

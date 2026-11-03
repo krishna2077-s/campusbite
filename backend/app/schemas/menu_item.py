@@ -33,11 +33,13 @@ class MenuItemOut(BaseModel):
     id: int
     restaurant_id: int
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     price: Decimal
-    category: Optional[str]
-    image_url: Optional[str]
-    is_available: bool
+    category: Optional[str] = None
+    image_url: Optional[str] = None
+    image: Optional[str] = None
+    is_available: bool = True
     created_at: datetime
 
     model_config = {"from_attributes": True}
+

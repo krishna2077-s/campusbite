@@ -153,11 +153,16 @@ export default function OrderManagement() {
               background: statusFilter === s ? 'var(--primary)' : 'var(--white)',
               color: statusFilter === s ? 'white' : 'var(--secondary)',
               border: `1px solid ${statusFilter === s ? 'var(--primary)' : 'var(--gray-200)'}`,
+              borderRadius: 'var(--radius-full)',
+              padding: '6px 14px',
+              fontWeight: 700,
+              boxShadow: statusFilter === s ? '0 2px 8px rgba(249, 87, 33, 0.3)' : 'var(--shadow-xs)',
             }}
             onClick={() => { setStatusFilter(s); setPage(1) }}
           >
             {s === 'All' ? `All (${orders.length})` : `${s} (${orders.filter(o => o.status === s).length})`}
           </button>
+
         ))}
       </div>
 

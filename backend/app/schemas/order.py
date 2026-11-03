@@ -17,9 +17,29 @@ class OrderItemCreate(BaseModel):
 class OrderItemOut(BaseModel):
     id: int
     menu_item_id: int
+    name: Optional[str] = None
     quantity: int
     unit_price: Decimal
+    price: Optional[Decimal] = None
     subtotal: Decimal
+
+    model_config = {"from_attributes": True}
+
+
+class RestaurantSummary(BaseModel):
+    id: int
+    name: str
+    cuisine_type: Optional[str] = None
+    address: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class CustomerSummary(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    phone: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -39,16 +59,20 @@ class OrderOut(BaseModel):
     id: int
     customer_id: int
     restaurant_id: int
-    delivery_partner_id: Optional[int]
+    delivery_partner_id: Optional[int] = None
     status: OrderStatus
     total_amount: Decimal
+    total: Optional[Decimal] = None
     delivery_address: str
     payment_status: PaymentStatus
     created_at: datetime
     updated_at: datetime
     items: List[OrderItemOut] = []
+    restaurant: Optional[RestaurantSummary] = None
+    customer: Optional[CustomerSummary] = None
 
     model_config = {"from_attributes": True}
+
 
 
 class ReminderOut(BaseModel):

@@ -63,11 +63,21 @@ def startup_event():
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created / verified.")
 
+    # Auto-seed initial demo dataset if database is newly initialized
+    try:
+        from app.database import SessionLocal
+        from app.seed import seed_database_if_empty
+        with SessionLocal() as db:
+            seed_database_if_empty(db)
+    except Exception as exc:
+        logger.warning(f"Initial database seeding skipped or encountered error: {exc}")
+
     from app.background_tasks.reminder_tasks import check_stale_orders
 
     scheduler.add_job(check_stale_orders, "interval", minutes=5, id="stale_order_checker")
     scheduler.start()
     logger.info("APScheduler started – stale-order checker runs every 5 minutes.")
+
 
 
 @app.on_event("shutdown")

@@ -133,18 +133,22 @@ export default function RestaurantMenu() {
             background: 'rgba(255,255,255,0.15)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '2.5rem', flexShrink: 0,
+            overflow: 'hidden',
           }}>
-            {restaurant.image ? <img src={restaurant.image} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : '🍽️'}
+            {(restaurant.image || restaurant.image_url) ? (
+              <img src={restaurant.image || restaurant.image_url} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+            ) : '🍽️'}
           </div>
           <div>
-            <h1 style={{ color: 'white', margin: 0 }}>{restaurant.name}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.75)', margin: '4px 0 0', fontSize: '0.9rem' }}>
-              {restaurant.cuisine_type && <span>🍴 {restaurant.cuisine_type} &nbsp;|&nbsp;</span>}
+            <h1 style={{ color: 'white', margin: 0, letterSpacing: '-0.02em' }}>{restaurant.name}</h1>
+            <p style={{ color: 'rgba(255,255,255,0.85)', margin: '6px 0 0', fontSize: '0.92rem' }}>
+              {restaurant.cuisine_type && <span>🍴 {restaurant.cuisine_type} &nbsp;|&nbsp; </span>}
               {restaurant.address && <span>📍 {restaurant.address}</span>}
             </p>
           </div>
         </div>
       )}
+
 
       <div className="dashboard-layout">
         {/* Menu */}

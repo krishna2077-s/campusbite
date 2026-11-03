@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../api/api'
 
 const ROLES = [
-  { value: 'customer', label: '🛒 Customer - Order food from restaurants' },
-  { value: 'owner', label: '🏪 Restaurant Owner - Manage your restaurant' },
-  { value: 'delivery', label: '🏍 Delivery Partner - Deliver orders' },
+  { value: 'customer', label: '🛒 Customer', desc: 'Browse campus eateries, customize orders, and get food delivered.' },
+  { value: 'owner', label: '🏪 Restaurant Owner', desc: 'Manage menus, accept orders, track revenue, and assign deliveries.' },
+  { value: 'delivery', label: '🏍 Delivery Partner', desc: 'Pick up orders and deliver fresh meals across campus buildings.' },
 ]
 
 export default function Register() {
@@ -26,9 +26,9 @@ export default function Register() {
   const validate = () => {
     const errs = {}
     if (!form.full_name.trim()) errs.full_name = 'Full name is required'
-    else if (form.full_name.trim().length < 2) errs.full_name = 'Name too short'
+    else if (form.full_name.trim().length < 2) errs.full_name = 'Name must be at least 2 characters'
     if (!form.email) errs.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email'
+    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email address'
     if (!form.password) errs.password = 'Password is required'
     else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters'
     if (!form.confirm_password) errs.confirm_password = 'Please confirm your password'
@@ -51,23 +51,30 @@ export default function Register() {
 
     setLoading(true)
     try {
+      const roleMap = {
+        customer: 'customer',
+        owner: 'restaurant_owner',
+        delivery: 'delivery_partner',
+      }
+      const mappedRole = roleMap[form.role] || form.role
+
       const payload = {
         full_name: form.full_name.trim(),
         name: form.full_name.trim(),
-        email: form.email,
+        email: form.email.trim().toLowerCase(),
         password: form.password,
-        phone: form.phone,
-        role: form.role,
-        user_type: form.role,
+        phone: form.phone.trim(),
+        role: mappedRole,
+        user_type: mappedRole,
       }
       await register(payload)
-      setSuccess('Account created successfully! Redirecting to login...')
-      setTimeout(() => navigate('/login'), 1800)
+      setSuccess('🎉 Account created successfully! Redirecting to login...')
+      setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
       setApiError(
         err.response?.data?.detail ||
         err.response?.data?.message ||
-        'Registration failed. Please try again.'
+        'Registration failed. Please check your inputs and try again.'
       )
     } finally {
       setLoading(false)
@@ -76,11 +83,11 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card" style={{ maxWidth: 500 }}>
+      <div className="auth-card" style={{ maxWidth: 520 }}>
         <div className="auth-logo">
           <div className="logo-icon">🍕</div>
           <h1>Campus<span>Bite</span></h1>
-          <p>Create your account</p>
+          <p>Create your campus dining account</p>
         </div>
 
         {apiError && (
@@ -101,7 +108,7 @@ export default function Register() {
               type="text"
               name="full_name"
               className={`form-control ${errors.full_name ? 'error' : ''}`}
-              placeholder="Your full name"
+              placeholder="e.g. Alex Johnson"
               value={form.full_name}
               onChange={handleChange}
               autoComplete="name"
@@ -116,7 +123,7 @@ export default function Register() {
                 type="email"
                 name="email"
                 className={`form-control ${errors.email ? 'error' : ''}`}
-                placeholder="you@example.com"
+                placeholder="you@campusbite.com"
                 value={form.email}
                 onChange={handleChange}
                 autoComplete="email"
@@ -170,19 +177,20 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">I am a...</label>
+            <label className="form-label">Select Your Role</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {ROLES.map((r) => (
                 <label key={r.value} style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  padding: '12px 16px',
                   border: `2px solid ${form.role === r.value ? 'var(--primary)' : 'var(--gray-200)'}`,
                   borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
-                  background: form.role === r.value ? '#fff7ed' : 'var(--white)',
-                  transition: 'all 0.2s ease',
+                  background: form.role === r.value ? 'var(--primary-subtle)' : 'var(--white)',
+                  transition: 'var(--transition)',
+                  boxShadow: form.role === r.value ? '0 0 0 1px var(--primary-border)' : 'none',
                 }}>
                   <input
                     type="radio"
@@ -190,22 +198,29 @@ export default function Register() {
                     value={r.value}
                     checked={form.role === r.value}
                     onChange={handleChange}
-                    style={{ accentColor: 'var(--primary)' }}
+                    style={{ accentColor: 'var(--primary)', marginTop: 3 }}
                   />
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{r.label}</span>
+                  <div>
+                    <span style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--secondary)', display: 'block' }}>
+                      {r.label}
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--gray-500)', lineHeight: 1.4 }}>
+                      {r.desc}
+                    </span>
+                  </div>
                 </label>
               ))}
             </div>
           </div>
 
           <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading}>
-            {loading ? '⏳ Creating account...' : '🚀 Create Account'}
+            {loading ? '⏳ Creating account...' : '🚀 Create CampusBite Account'}
           </button>
         </form>
 
         <div className="auth-footer">
           Already have an account?{' '}
-          <Link to="/login" style={{ fontWeight: 700 }}>Sign in</Link>
+          <Link to="/login" style={{ fontWeight: 800, color: 'var(--primary)' }}>Sign in here</Link>
         </div>
       </div>
     </div>

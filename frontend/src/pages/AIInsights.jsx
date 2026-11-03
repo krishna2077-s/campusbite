@@ -74,10 +74,11 @@ export default function AIInsights() {
             marginLeft: 'auto',
             width: 10, height: 10,
             borderRadius: '50%',
-            background: '#4ade80',
-            boxShadow: '0 0 0 3px rgba(74,222,128,0.3)',
+            background: 'var(--accent)',
+            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.3)',
           }} />
         </div>
+
 
         {/* Body */}
         <div className="ai-chat-body">
@@ -118,16 +119,18 @@ export default function AIInsights() {
                 marginBottom: 16,
               }}>
                 <div style={{
-                  background: 'var(--primary)',
+                  background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
                   color: 'white',
-                  padding: '10px 16px',
+                  padding: '11px 18px',
                   borderRadius: '18px 18px 4px 18px',
                   maxWidth: '80%',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
+                  fontSize: '0.92rem',
+                  fontWeight: 600,
+                  boxShadow: 'var(--shadow-sm)',
                 }}>
                   {query}
                 </div>
+
               </div>
 
               {/* Answer bubble */}

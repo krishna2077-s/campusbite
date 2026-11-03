@@ -91,11 +91,16 @@ export default function RestaurantList() {
               background: cuisine === c ? 'var(--primary)' : 'var(--white)',
               color: cuisine === c ? 'white' : 'var(--secondary)',
               border: `1px solid ${cuisine === c ? 'var(--primary)' : 'var(--gray-200)'}`,
+              boxShadow: cuisine === c ? '0 2px 8px rgba(249, 87, 33, 0.3)' : 'var(--shadow-xs)',
+              borderRadius: 'var(--radius-full)',
+              padding: '6px 14px',
+              fontWeight: 700,
             }}
             onClick={() => setCuisine(c)}
           >
             {c}
           </button>
+
         ))}
       </div>
 

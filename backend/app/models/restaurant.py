@@ -29,3 +29,18 @@ class Restaurant(Base):
     orders = relationship("Order", back_populates="restaurant")
     reviews = relationship("Review", back_populates="restaurant")
     reminders = relationship("Reminder", back_populates="restaurant")
+
+    @property
+    def image(self) -> str | None:
+        return self.image_url
+
+    @property
+    def is_open(self) -> bool:
+        return bool(self.is_active)
+
+    @property
+    def rating(self) -> float:
+        if self.reviews:
+            return round(sum(r.rating for r in self.reviews) / len(self.reviews), 1)
+        return 4.8
+

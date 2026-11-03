@@ -3,6 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api/api'
 import { useAuth } from '../context/AuthContext'
 
+const DEMO_ACCOUNTS = [
+  { role: 'Student', email: 'student@campusbite.com', password: 'password123', icon: '🧑‍🎓' },
+  { role: 'Owner', email: 'owner@campusbite.com', password: 'password123', icon: '👨‍🍳' },
+  { role: 'Delivery', email: 'delivery@campusbite.com', password: 'password123', icon: '🛵' },
+]
+
 export default function Login() {
   const navigate = useNavigate()
   const { login: authLogin } = useAuth()
@@ -23,6 +29,12 @@ export default function Login() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' })
+  }
+
+  const handleFillDemo = (demo) => {
+    setForm({ email: demo.email, password: demo.password })
+    setErrors({})
+    setApiError('')
   }
 
   const handleSubmit = async (e) => {
@@ -54,7 +66,7 @@ export default function Login() {
       setApiError(
         err.response?.data?.detail ||
         err.response?.data?.message ||
-        'Invalid credentials. Please try again.'
+        'Invalid credentials. Please check your email and password.'
       )
     } finally {
       setLoading(false)
@@ -67,7 +79,27 @@ export default function Login() {
         <div className="auth-logo">
           <div className="logo-icon">🍕</div>
           <h1>Campus<span>Bite</span></h1>
-          <p>Sign in to your account</p>
+          <p>Sign in to your campus food account</p>
+        </div>
+
+        {/* Quick Demo Credentials Helper */}
+        <div className="demo-credentials-box">
+          <div className="demo-credentials-title">
+            <span>⚡</span> Quick Demo Sign-In (Click to Fill)
+          </div>
+          <div className="demo-btns-grid">
+            {DEMO_ACCOUNTS.map((demo) => (
+              <button
+                key={demo.role}
+                type="button"
+                className="demo-role-btn"
+                onClick={() => handleFillDemo(demo)}
+                title={`Fill ${demo.role} demo credentials`}
+              >
+                {demo.icon} {demo.role}
+              </button>
+            ))}
+          </div>
         </div>
 
         {apiError && (
@@ -83,7 +115,7 @@ export default function Login() {
               type="email"
               name="email"
               className={`form-control ${errors.email ? 'error' : ''}`}
-              placeholder="you@example.com"
+              placeholder="you@campusbite.com"
               value={form.email}
               onChange={handleChange}
               autoComplete="email"
@@ -106,13 +138,13 @@ export default function Login() {
           </div>
 
           <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading}>
-            {loading ? '⏳ Signing in...' : '🔐 Sign In'}
+            {loading ? '⏳ Signing in...' : '🔐 Sign In to CampusBite'}
           </button>
         </form>
 
         <div className="auth-footer">
           Don't have an account?{' '}
-          <Link to="/register" style={{ fontWeight: 700 }}>Create one</Link>
+          <Link to="/register" style={{ fontWeight: 800, color: 'var(--primary)' }}>Create one free</Link>
         </div>
       </div>
     </div>

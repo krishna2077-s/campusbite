@@ -5,10 +5,10 @@ import RestaurantCard from '../components/RestaurantCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const FEATURES = [
-  { icon: '🍔', title: 'Wide Selection', desc: 'Browse menus from all campus restaurants in one place' },
-  { icon: '⚡', title: 'Fast Delivery', desc: 'Your food delivered right to your dorm or classroom' },
-  { icon: '🤖', title: 'AI Insights', desc: 'Smart analytics about your ordering habits' },
-  { icon: '💳', title: 'Easy Payments', desc: 'Secure and seamless payment processing' },
+  { icon: '🍔', title: 'Curated Campus Eateries', desc: 'Browse fresh menus from verified campus kitchens, cafes, and dining halls in one spot.' },
+  { icon: '⚡', title: 'Lightning Dorm Delivery', desc: 'Real-time order tracking delivered directly to your dorm room, library, or faculty center.' },
+  { icon: '🤖', title: 'AI-Powered Insights', desc: 'Natural language analysis grounded on your order history and weekly spending patterns.' },
+  { icon: '💳', title: 'Frictionless Mock Checkout', desc: 'Instant dummy payments with transparent ledger records and customer refund dispute workflows.' },
 ]
 
 export default function Home() {
@@ -36,18 +36,18 @@ export default function Home() {
             Hungry on <span>Campus</span>?
           </h1>
           <p>
-            Discover and order from your favourite campus restaurants.
-            Fast delivery, easy payments, and AI-powered insights.
+            Discover and order from your favorite campus restaurants.
+            Ultra-fast dorm delivery, seamless mock payments, and AI-powered dining analytics.
           </p>
           <div className="hero-actions">
             <Link to="/restaurants" className="btn btn-primary btn-lg">
               🍽️ Browse Restaurants
             </Link>
             <Link to="/register" className="btn btn-lg" style={{
-              background: 'rgba(255,255,255,0.15)',
+              background: 'rgba(255, 255, 255, 0.12)',
               color: 'white',
-              border: '2px solid rgba(255,255,255,0.3)',
-              backdropFilter: 'blur(10px)',
+              border: '1.5px solid rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(12px)',
             }}>
               🚀 Get Started Free
             </Link>
@@ -60,7 +60,7 @@ export default function Home() {
         <div className="container">
           <div className="section-heading">
             <h2>Why choose <span className="text-primary">CampusBite</span>?</h2>
-            <p>Everything you need for the perfect campus dining experience</p>
+            <p>Everything you need for an elevated, stress-free campus dining experience</p>
           </div>
           <div className="features-grid">
             {FEATURES.map((f, i) => (
@@ -78,17 +78,17 @@ export default function Home() {
       <section className="section" style={{ background: 'var(--bg)' }}>
         <div className="container">
           <div className="section-heading">
-            <h2>Featured Restaurants</h2>
-            <p>Fresh picks from campus kitchens ready to serve you</p>
+            <h2>Featured Eateries</h2>
+            <p>Fresh picks from campus kitchens ready to serve hot and delicious meals</p>
           </div>
 
           {loading ? (
-            <LoadingSpinner text="Fetching restaurants..." />
+            <LoadingSpinner text="Fetching campus restaurants..." />
           ) : featured.length === 0 ? (
             <div className="empty-state">
               <span className="empty-state-icon">🏪</span>
-              <h3>No restaurants yet</h3>
-              <p>Check back soon — campus restaurants are joining!</p>
+              <h3>No restaurants registered yet</h3>
+              <p>Sign up as an owner to register your campus eatery and publish your menu!</p>
               <Link to="/restaurants" className="btn btn-primary">Browse All</Link>
             </div>
           ) : (
@@ -100,42 +100,41 @@ export default function Home() {
           )}
 
           {featured.length > 0 && (
-            <div className="text-center mt-3">
-              <Link to="/restaurants" className="btn btn-outline">
-                View All Restaurants →
+            <div className="text-center mt-4">
+              <Link to="/restaurants" className="btn btn-outline btn-lg">
+                Explore All Campus Eateries →
               </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Call to Action */}
       <section style={{
-        background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-        padding: '60px 20px',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        padding: '70px 24px',
         textAlign: 'center',
         color: 'white',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       }}>
         <div className="container">
-          <h2 style={{ color: 'white', marginBottom: 12 }}>Ready to order?</h2>
-          <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 28, maxWidth: 420, margin: '0 auto 28px' }}>
-            Join thousands of campus students already using CampusBite
+          <h2 style={{ color: 'white', marginBottom: 14, fontSize: '2.2rem', fontWeight: 900 }}>
+            Ready to taste the best on campus?
+          </h2>
+          <p style={{ color: '#cbd5e1', marginBottom: 30, maxWidth: 480, margin: '0 auto 30px', fontSize: '1.05rem' }}>
+            Join hundreds of students, faculty, and restaurant owners enjoying seamless campus food delivery.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register" className="btn btn-lg" style={{
-              background: 'white',
-              color: 'var(--primary)',
-              border: 'none',
-              fontWeight: 700,
-            }}>
-              Sign Up Free
+            <Link to="/register" className="btn btn-primary btn-lg">
+              Sign Up Free Today
             </Link>
-            <Link to="/restaurants" className="btn btn-lg" style={{
+            <Link to="/restaurants" className="btn btn-ghost btn-lg" style={{
               background: 'transparent',
-              border: '2px solid white',
+              borderColor: 'rgba(255, 255, 255, 0.3)',
               color: 'white',
             }}>
-              Browse Restaurants
+              Browse Menus
             </Link>
           </div>
         </div>
@@ -143,16 +142,20 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={{
-        background: 'var(--secondary)',
+        background: '#020617',
         color: 'var(--gray-400)',
-        padding: '28px 20px',
+        padding: '36px 24px',
         textAlign: 'center',
-        fontSize: '0.88rem',
+        fontSize: '0.9rem',
       }}>
-        <p style={{ margin: 0 }}>
-          🍕 <strong style={{ color: 'white' }}>CampusBite</strong> — Campus Food Ordering Platform
-          &nbsp;|&nbsp; Built with ❤️ for students
-        </p>
+        <div className="container">
+          <p style={{ margin: '0 0 10px', color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>
+            🍕 CampusBite
+          </p>
+          <p style={{ margin: 0, color: 'var(--gray-500)', fontSize: '0.86rem' }}>
+            Full-Stack Campus Food Ordering & Delivery Platform &bull; FastAPI + React 18 + SQLite + OpenAI
+          </p>
+        </div>
       </footer>
     </div>
   )

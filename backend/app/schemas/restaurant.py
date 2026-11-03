@@ -30,16 +30,20 @@ class RestaurantUpdate(BaseModel):
 class RestaurantOut(BaseModel):
     id: int
     name: str
-    description: Optional[str]
-    cuisine_type: Optional[str]
+    description: Optional[str] = None
+    cuisine_type: Optional[str] = None
     address: str
-    phone: Optional[str]
-    image_url: Optional[str]
-    is_active: bool
+    phone: Optional[str] = None
+    image_url: Optional[str] = None
+    image: Optional[str] = None
+    is_active: bool = True
+    is_open: Optional[bool] = True
+    rating: Optional[float] = 4.8
     owner_id: int
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
 
 
 class RestaurantWithMenu(RestaurantOut):

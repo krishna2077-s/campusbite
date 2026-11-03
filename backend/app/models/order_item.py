@@ -19,3 +19,12 @@ class OrderItem(Base):
     # Relationships
     order = relationship("Order", back_populates="items")
     menu_item = relationship("MenuItem", back_populates="order_items")
+
+    @property
+    def name(self) -> str:
+        return self.menu_item.name if self.menu_item else f"Item #{self.menu_item_id}"
+
+    @property
+    def price(self) -> Numeric:
+        return self.unit_price
+

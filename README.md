@@ -22,6 +22,19 @@
 
 ---
 
+## 🔑 Demo Evaluation Credentials
+
+The backend automatically seeds these pre-configured accounts on initial startup so reviewers and professors can evaluate all roles immediately (or click the quick-fill buttons on the Sign-In page):
+
+| Role | Demo Email | Password | Role Dashboard & Features |
+|---|---|---|---|
+| **🧑‍🎓 Student (Customer)** | `student@campusbite.com` | `password123` | Browse 4 eateries, dish filtering, mock checkout, order tracking, star reviews, and AI insights |
+| **👨‍🍳 Restaurant Owner** | `owner@campusbite.com` | `password123` | Menu CRUD, dish availability toggles, incoming order pipeline, revenue stats, refund disputes |
+| **🛵 Delivery Partner** | `delivery@campusbite.com` | `password123` | Dedicated delivery queue, live dorm address display, transitions (`OUT_FOR_DELIVERY` → `DELIVERED`) |
+
+
+---
+
 ## 🚀 Live Deployment on Render
 
 Deploy both the backend and frontend in one click using Render Blueprint:

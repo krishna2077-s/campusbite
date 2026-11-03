@@ -50,3 +50,8 @@ class Order(Base):
     payment = relationship("Payment", back_populates="order", uselist=False)
     reminders = relationship("Reminder", back_populates="order")
     refund_request = relationship("ReturnRefund", back_populates="order", uselist=False)
+
+    @property
+    def total(self) -> Numeric:
+        return self.total_amount
+

@@ -223,22 +223,27 @@ export default function CustomerDashboard() {
                         return (
                           <React.Fragment key={step}>
                             <div style={{
-                              fontSize: '0.68rem',
-                              fontWeight: 700,
-                              padding: '2px 8px',
-                              borderRadius: 20,
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              padding: '4px 10px',
+                              borderRadius: 'var(--radius-full)',
                               whiteSpace: 'nowrap',
-                              background: isDone ? '#dcfce7' : isActive ? '#ffedd5' : 'var(--gray-100)',
-                              color: isDone ? '#15803d' : isActive ? '#c2410c' : 'var(--gray-400)',
+                              background: isDone ? 'var(--accent-subtle)' : isActive ? 'var(--primary-subtle)' : 'var(--gray-100)',
+                              color: isDone ? 'var(--accent-dark)' : isActive ? 'var(--primary-dark)' : 'var(--gray-500)',
+                              border: `1px solid ${isDone ? 'var(--accent-border)' : isActive ? 'var(--primary-border)' : 'var(--gray-200)'}`,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
                             }}>
-                              {step.replace(/_/g, ' ')}
+                              {isDone ? '✓ ' : isActive ? '● ' : ''}{step.replace(/_/g, ' ')}
                             </div>
                             {i < ORDER_TIMELINE.length - 1 && (
-                              <span style={{ color: 'var(--gray-300)', fontSize: '0.7rem' }}>→</span>
+                              <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem', fontWeight: 700 }}>→</span>
                             )}
                           </React.Fragment>
                         )
                       })}
+
                     </div>
                   )}
                   <OrderCard

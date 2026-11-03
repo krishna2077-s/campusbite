@@ -10,11 +10,13 @@ export default function MenuItemCard({ item, onAddToCart, isOwner, onEdit, onDel
     description,
     price,
     image,
+    image_url,
     is_available = true,
     category,
   } = item
 
   const itemId = id || _id
+  const imgSrc = image || image_url
 
   const handleAdd = () => {
     onAddToCart && onAddToCart({ ...item, id: itemId }, qty)
@@ -25,8 +27,8 @@ export default function MenuItemCard({ item, onAddToCart, isOwner, onEdit, onDel
     <div className={`menu-item-card ${!is_available && !isOwner ? 'menu-item-unavailable' : ''}`}>
       {/* Image */}
       <div className="menu-item-img">
-        {image ? (
-          <img src={image} alt={name} />
+        {imgSrc ? (
+          <img src={imgSrc} alt={name} />
         ) : (
           <span>🍽️</span>
         )}
@@ -42,7 +44,15 @@ export default function MenuItemCard({ item, onAddToCart, isOwner, onEdit, onDel
         </div>
 
         {category && (
-          <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600, textTransform: 'uppercase' }}>
+          <span style={{
+            fontSize: '0.74rem',
+            color: 'var(--primary)',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            display: 'inline-block',
+            marginBottom: 4,
+          }}>
             {category}
           </span>
         )}
@@ -53,30 +63,31 @@ export default function MenuItemCard({ item, onAddToCart, isOwner, onEdit, onDel
 
         {/* Customer: Add to Cart */}
         {!isOwner && is_available && onAddToCart && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
             <div className="quantity-control">
-              <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
+              <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))} aria-label="Decrease quantity">−</button>
               <span className="qty-value">{qty}</span>
-              <button className="qty-btn" onClick={() => setQty(qty + 1)}>+</button>
+              <button className="qty-btn" onClick={() => setQty(qty + 1)} aria-label="Increase quantity">+</button>
             </div>
             <button className="btn btn-sm btn-primary" onClick={handleAdd}>
-              Add to Cart
+              🛍️ Add to Cart
             </button>
           </div>
         )}
 
         {/* Owner controls */}
         {isOwner && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
             <button className="btn btn-sm btn-ghost" onClick={() => onEdit && onEdit(item)}>
               ✏️ Edit
             </button>
             <button
               className="btn btn-sm"
               style={{
-                background: is_available ? '#fef3c7' : '#dcfce7',
-                color: is_available ? '#b45309' : '#15803d',
-                border: 'none',
+                background: is_available ? 'var(--warning-subtle)' : 'var(--accent-subtle)',
+                color: is_available ? 'var(--warning-dark)' : 'var(--accent-dark)',
+                border: `1px solid ${is_available ? 'var(--warning-border)' : 'var(--accent-border)'}`,
+                fontWeight: 700,
               }}
               onClick={() => onToggle && onToggle(itemId)}
             >
