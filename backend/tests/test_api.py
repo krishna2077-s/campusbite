@@ -167,6 +167,20 @@ def test_restaurant_search_queries():
     assert res_mismatch.status_code == 200
     assert res_mismatch.json() == []
 
+    # 9. Verify menu_items are included in restaurant list response
+    res_with_menu = client.get("/restaurants")
+    assert res_with_menu.status_code == 200
+    data = res_with_menu.json()
+    assert len(data) >= 1
+    assert "menu_items" in data[0]
+    assert len(data[0]["menu_items"]) >= 1
+
+    # 10. Combined name and search filtering
+    res_combo = client.get("/restaurants?name=Rustic&search=Pizza")
+    assert res_combo.status_code == 200
+    assert len(res_combo.json()) >= 1
+    assert all("Rustic" in r["name"] for r in res_combo.json())
+
 
 def test_order_placement_and_lifecycle():
     # Login as student

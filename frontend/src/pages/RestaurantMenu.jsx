@@ -164,6 +164,17 @@ export default function RestaurantMenu() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+              {search && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
+                  onClick={() => setSearch('')}
+                  title="Clear search"
+                  aria-label="Clear menu search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
             <input
               type="number"

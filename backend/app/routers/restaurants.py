@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.models.menu_item import MenuItem
@@ -26,7 +26,7 @@ def list_restaurants(
     is_active: Optional[bool] = Query(True, description="Filter by active status"),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Restaurant)
+    query = db.query(Restaurant).options(selectinload(Restaurant.menu_items))
 
     if is_active is not None:
         query = query.filter(Restaurant.is_active == is_active)
@@ -36,8 +36,12 @@ def list_restaurants(
     if target_cuisine and target_cuisine.lower() != "all":
         query = query.filter(Restaurant.cuisine_type.ilike(f"%{target_cuisine}%"))
 
-    # General search query (supports search, q, or name)
-    search_term = (search or q or name or "").strip()
+    # Explicit name filter
+    if name and name.strip():
+        query = query.filter(Restaurant.name.ilike(f"%{name.strip()}%"))
+
+    # General search query (supports search or q alias)
+    search_term = (search or q or "").strip()
     if search_term:
         term = f"%{search_term}%"
         query = query.filter(

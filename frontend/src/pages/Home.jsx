@@ -44,19 +44,54 @@ export default function Home() {
     navigate(`/restaurants?cuisine=${encodeURIComponent(tag)}`)
   }
 
-  // Live filter featured restaurants if user types on the home page
+  // Live filter featured restaurants if user types on the home page (including dish matches)
   const displayedFeatured = useMemo(() => {
     if (!searchQuery.trim()) {
       return restaurants.slice(0, 4)
     }
     const q = searchQuery.toLowerCase().trim()
-    return restaurants.filter(
-      (r) =>
-        r.name?.toLowerCase().includes(q) ||
-        r.cuisine_type?.toLowerCase().includes(q) ||
-        r.description?.toLowerCase().includes(q) ||
-        r.address?.toLowerCase().includes(q)
-    )
+    const words = q.split(/\s+/).filter(Boolean)
+
+    return restaurants.filter((r) => {
+      const name = (r.name || '').toLowerCase()
+      const cuisine = (r.cuisine_type || '').toLowerCase()
+      const desc = (r.description || '').toLowerCase()
+      const addr = (r.address || '').toLowerCase()
+
+      // Direct metadata match
+      if (name.includes(q) || cuisine.includes(q) || desc.includes(q) || addr.includes(q)) {
+        return true
+      }
+
+      // Dish menu item match
+      if (Array.isArray(r.menu_items)) {
+        const dishMatch = r.menu_items.some(
+          (m) =>
+            (m.name || '').toLowerCase().includes(q) ||
+            (m.category || '').toLowerCase().includes(q) ||
+            (m.description || '').toLowerCase().includes(q)
+        )
+        if (dishMatch) return true
+      }
+
+      // Multi-word match across restaurant fields and dish items
+      if (words.length > 1) {
+        return words.every((word) => {
+          const inMeta = name.includes(word) || cuisine.includes(word) || desc.includes(word) || addr.includes(word)
+          const inMenu =
+            Array.isArray(r.menu_items) &&
+            r.menu_items.some(
+              (m) =>
+                (m.name || '').toLowerCase().includes(word) ||
+                (m.category || '').toLowerCase().includes(word) ||
+                (m.description || '').toLowerCase().includes(word)
+            )
+          return inMeta || inMenu
+        })
+      }
+
+      return false
+    })
   }, [restaurants, searchQuery])
 
   return (

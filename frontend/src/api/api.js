@@ -50,20 +50,39 @@ export const getMe = () =>
   api.get('/auth/me')
 
 // ─── Restaurants ─────────────────────────────────────────────────────────────
-export const getRestaurants = (params) => {
+export const getRestaurants = (params, config = {}) => {
+  const axiosConfig = { ...config }
+
   if (typeof params === 'string') {
     const q = params.trim()
-    return api.get('/restaurants', { params: q ? { search: q, q } : undefined })
+    if (q) {
+      axiosConfig.params = { search: q }
+    }
+    return api.get('/restaurants', axiosConfig)
   }
+
   if (params && typeof params === 'object') {
-    const normalized = { ...params }
-    if (normalized.search && !normalized.q) normalized.q = normalized.search
-    if (normalized.q && !normalized.search) normalized.search = normalized.q
-    if (normalized.cuisine && !normalized.cuisine_type) normalized.cuisine_type = normalized.cuisine
-    if (normalized.cuisine_type && !normalized.cuisine) normalized.cuisine = normalized.cuisine_type
-    return api.get('/restaurants', { params: normalized })
+    const queryParams = {}
+    const searchVal = (params.search || params.q || '').trim()
+    const nameVal = (params.name || '').trim()
+    const cuisineVal = (params.cuisine || params.cuisine_type || '').trim()
+
+    if (searchVal) queryParams.search = searchVal
+    if (nameVal) queryParams.name = nameVal
+    if (cuisineVal && cuisineVal.toLowerCase() !== 'all') {
+      queryParams.cuisine = cuisineVal
+    }
+    if (params.is_active !== undefined) {
+      queryParams.is_active = params.is_active
+    }
+
+    if (Object.keys(queryParams).length > 0) {
+      axiosConfig.params = queryParams
+    }
+    return api.get('/restaurants', axiosConfig)
   }
-  return api.get('/restaurants')
+
+  return api.get('/restaurants', axiosConfig)
 }
 
 export const getRestaurant = (id) =>

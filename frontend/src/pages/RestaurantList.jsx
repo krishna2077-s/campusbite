@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getRestaurants } from '../api/api'
 import RestaurantCard from '../components/RestaurantCard'
@@ -32,12 +32,41 @@ export default function RestaurantList() {
     searchParams.get('cuisine_type') ||
     'All'
 
-  const [restaurants, setRestaurants] = useState([])
-  const [filtered, setFiltered] = useState([])
+  const [allRestaurants, setAllRestaurants] = useState([])
+  const [serverResults, setServerResults] = useState(null)
   const [search, setSearch] = useState(initialQuery)
   const [cuisine, setCuisine] = useState(initialCuisine)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const abortControllerRef = useRef(null)
+
+  // Fetch full restaurant catalog (with menu_items) on mount
+  useEffect(() => {
+    let isMounted = true
+    setLoading(true)
+
+    getRestaurants()
+      .then((res) => {
+        if (!isMounted) return
+        const data = res.data
+        const list = Array.isArray(data)
+          ? data
+          : data.results || data.restaurants || []
+        setAllRestaurants(list)
+      })
+      .catch(() => {
+        if (!isMounted) return
+        setError('Failed to load restaurants. Please try again.')
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Sync state if URL search parameters change externally (e.g. browser back/forward)
   useEffect(() => {
@@ -51,168 +80,164 @@ export default function RestaurantList() {
       searchParams.get('cuisine_type') ||
       'All'
 
-    setSearch(urlQuery)
-    setCuisine(urlCuisine)
-  }, [searchParams])
+    if (urlQuery.trim() !== search.trim()) {
+      setSearch(urlQuery)
+    }
+    if (urlCuisine.trim().toLowerCase() !== cuisine.trim().toLowerCase()) {
+      setCuisine(urlCuisine)
+    }
+  }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Helper to synchronize active search & cuisine into URL query string
-  const syncUrlParams = useCallback(
-    (newSearch, newCuisine) => {
+  // Debounced synchronization of state to URL params (prevents cursor jump and space stripping)
+  useEffect(() => {
+    const timer = setTimeout(() => {
       const nextParams = new URLSearchParams()
-      const trimmed = (newSearch || '').trim()
+      const trimmed = search.trim()
       if (trimmed) {
         nextParams.set('search', trimmed)
       }
-      if (newCuisine && newCuisine !== 'All') {
-        nextParams.set('cuisine', newCuisine)
+      if (cuisine && cuisine.toLowerCase() !== 'all') {
+        nextParams.set('cuisine', cuisine)
       }
-      setSearchParams(nextParams, { replace: true })
-    },
-    [setSearchParams]
-  )
 
-  // Fetch full restaurant list on mount (and server fallback if direct link with search)
-  useEffect(() => {
-    let isMounted = true
-    setLoading(true)
+      const currentUrlSearch = (
+        searchParams.get('search') ||
+        searchParams.get('q') ||
+        searchParams.get('name') ||
+        ''
+      ).trim()
+      const currentUrlCuisine = (
+        searchParams.get('cuisine') ||
+        searchParams.get('cuisine_type') ||
+        'All'
+      ).trim()
 
-    // Load initial list with any initial query params
-    const initialParams = {}
-    if (initialQuery.trim()) {
-      initialParams.search = initialQuery.trim()
-      initialParams.q = initialQuery.trim()
-    }
-    if (initialCuisine && initialCuisine !== 'All') {
-      initialParams.cuisine = initialCuisine
-    }
+      if (trimmed !== currentUrlSearch || cuisine !== currentUrlCuisine) {
+        setSearchParams(nextParams, { replace: true })
+      }
+    }, 300)
 
-    getRestaurants(Object.keys(initialParams).length > 0 ? initialParams : undefined)
-      .then((res) => {
-        if (!isMounted) return
-        const data = res.data
-        const list = Array.isArray(data)
-          ? data
-          : data.results || data.restaurants || []
-        setRestaurants(list)
-        setFiltered(list)
-      })
-      .catch(() => {
-        if (!isMounted) return
-        setError('Failed to load restaurants. Please try again.')
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false)
-      })
+    return () => clearTimeout(timer)
+  }, [search, cuisine, searchParams, setSearchParams])
 
-    // Also fetch all restaurants in background if initial query was specific, so client-side filter is instant
-    if (initialQuery.trim() || (initialCuisine && initialCuisine !== 'All')) {
-      getRestaurants()
-        .then((res) => {
-          if (!isMounted) return
-          const data = res.data
-          const allList = Array.isArray(data)
-            ? data
-            : data.results || data.restaurants || []
-          setRestaurants(allList)
-        })
-        .catch(() => {})
-    }
-
-    return () => {
-      isMounted = false
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Client-side filtering function (instant 0ms feedback)
-  const applyClientFilter = useCallback((baseList, queryStr, cuisineStr) => {
-    let list = [...baseList]
-    const q = (queryStr || '').trim().toLowerCase()
-    const c = (cuisineStr || 'All').trim().toLowerCase()
-
-    if (q) {
-      list = list.filter((r) => {
-        const nameMatch = r.name?.toLowerCase().includes(q)
-        const cuisineMatch = r.cuisine_type?.toLowerCase().includes(q)
-        const addressMatch = r.address?.toLowerCase().includes(q)
-        const descMatch = r.description?.toLowerCase().includes(q)
-        return nameMatch || cuisineMatch || addressMatch || descMatch
-      })
-    }
-
-    if (c && c !== 'all') {
-      list = list.filter(
-        (r) => r.cuisine_type?.toLowerCase() === c
-      )
-    }
-
-    return list
-  }, [])
-
-  // Run instant client-side filter whenever search, cuisine, or restaurants change
-  useEffect(() => {
-    const instantList = applyClientFilter(restaurants, search, cuisine)
-    setFiltered(instantList)
-  }, [restaurants, search, cuisine, applyClientFilter])
-
-  // Debounced server-side query to enrich results (e.g. matching specific dish items across restaurants)
-  const debounceRef = useRef(null)
-
+  // Optional debounced server query to guarantee synchronization with backend filters
   useEffect(() => {
     const trimmed = search.trim()
-    if (!trimmed && cuisine === 'All') return
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
+    if (!trimmed && (cuisine === 'All' || !cuisine)) {
+      setServerResults(null)
+      return
     }
 
-    debounceRef.current = setTimeout(() => {
-      const serverParams = {}
-      if (trimmed) {
-        serverParams.search = trimmed
-        serverParams.q = trimmed
-      }
-      if (cuisine && cuisine !== 'All') {
-        serverParams.cuisine = cuisine
-      }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
-      getRestaurants(serverParams)
+    const timer = setTimeout(() => {
+      const serverParams = {}
+      if (trimmed) serverParams.search = trimmed
+      if (cuisine && cuisine.toLowerCase() !== 'all') serverParams.cuisine = cuisine
+
+      getRestaurants(serverParams, { signal: controller.signal })
         .then((res) => {
           const data = res.data
           const serverList = Array.isArray(data)
             ? data
             : data.results || data.restaurants || []
-          if (serverList.length > 0) {
-            setFiltered(serverList)
-          } else if (trimmed) {
-            // Server confirmed 0 matches for this specific search term
-            setFiltered([])
+          setServerResults(serverList)
+        })
+        .catch((err) => {
+          if (err.name === 'CanceledError' || err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
+            return
           }
+          // On network glitch, fallback seamlessly to client filtering
         })
-        .catch(() => {
-          // Keep current client-filtered results on network glitch
-        })
-    }, 280)
+    }, 320)
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      clearTimeout(timer)
+      controller.abort()
     }
   }, [search, cuisine])
 
+  // Instant synchronous filtering (0ms latency, zero flicker, dish-aware, multi-word aware)
+  const filtered = useMemo(() => {
+    const source = serverResults !== null ? serverResults : allRestaurants
+    let list = [...source]
+    const q = search.trim().toLowerCase()
+    const c = (cuisine || 'All').trim().toLowerCase()
+
+    if (c && c !== 'all') {
+      list = list.filter((r) => (r.cuisine_type || '').toLowerCase() === c)
+    }
+
+    if (q) {
+      const words = q.split(/\s+/).filter(Boolean)
+      list = list.filter((r) => {
+        const name = (r.name || '').toLowerCase()
+        const cuisineType = (r.cuisine_type || '').toLowerCase()
+        const desc = (r.description || '').toLowerCase()
+        const addr = (r.address || '').toLowerCase()
+
+        // 1. Direct match on restaurant meta
+        if (name.includes(q) || cuisineType.includes(q) || desc.includes(q) || addr.includes(q)) {
+          return true
+        }
+
+        // 2. Dish / menu items match
+        if (Array.isArray(r.menu_items)) {
+          const dishMatch = r.menu_items.some((item) => {
+            const iName = (item.name || '').toLowerCase()
+            const iDesc = (item.description || '').toLowerCase()
+            const iCat = (item.category || '').toLowerCase()
+            return iName.includes(q) || iDesc.includes(q) || iCat.includes(q)
+          })
+          if (dishMatch) return true
+        }
+
+        // 3. Multi-word search
+        if (words.length > 1) {
+          const allWordsMatch = words.every((word) => {
+            const inMeta = name.includes(word) || cuisineType.includes(word) || desc.includes(word) || addr.includes(word)
+            const inMenu =
+              Array.isArray(r.menu_items) &&
+              r.menu_items.some((item) => {
+                const iName = (item.name || '').toLowerCase()
+                const iDesc = (item.description || '').toLowerCase()
+                const iCat = (item.category || '').toLowerCase()
+                return iName.includes(word) || iDesc.includes(word) || iCat.includes(word)
+              })
+            return inMeta || inMenu
+          })
+          if (allWordsMatch) return true
+        }
+
+        return false
+      })
+    }
+
+    return list
+  }, [allRestaurants, serverResults, search, cuisine])
+
   const handleSearchChange = (value) => {
     setSearch(value)
-    syncUrlParams(value, cuisine)
+    setServerResults(null)
   }
 
   const handleCuisineChange = (value) => {
     setCuisine(value)
-    syncUrlParams(search, value)
+    setServerResults(null)
   }
 
   const handleClearFilters = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
     setSearch('')
     setCuisine('All')
-    syncUrlParams('', 'All')
-    setFiltered(restaurants)
+    setServerResults(null)
+    setSearchParams(new URLSearchParams(), { replace: true })
   }
 
   return (

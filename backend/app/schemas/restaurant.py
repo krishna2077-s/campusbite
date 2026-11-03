@@ -41,10 +41,11 @@ class RestaurantOut(BaseModel):
     rating: Optional[float] = 4.8
     owner_id: int
     created_at: datetime
+    menu_items: List[MenuItemOut] = []
 
     model_config = {"from_attributes": True}
 
 
 
 class RestaurantWithMenu(RestaurantOut):
-    menu_items: List[MenuItemOut] = []
+    pass
