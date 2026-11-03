@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { getRestaurants } from '../api/api'
 import RestaurantCard from '../components/RestaurantCard'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -11,20 +11,53 @@ const FEATURES = [
   { icon: '💳', title: 'Frictionless Mock Checkout', desc: 'Instant dummy payments with transparent ledger records and customer refund dispute workflows.' },
 ]
 
+const QUICK_SEARCH_TAGS = ['Pizza', 'Chinese', 'Indian', 'Fast Food', 'Beverages', 'Desserts']
+
 export default function Home() {
-  const [featured, setFeatured] = useState([])
+  const navigate = useNavigate()
+  const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     getRestaurants()
       .then((res) => {
         const data = res.data
         const list = Array.isArray(data) ? data : data.results || data.restaurants || []
-        setFeatured(list.slice(0, 4))
+        setRestaurants(list)
       })
-      .catch(() => setFeatured([]))
+      .catch(() => setRestaurants([]))
       .finally(() => setLoading(false))
   }, [])
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    const trimmed = searchQuery.trim()
+    if (trimmed) {
+      navigate(`/restaurants?search=${encodeURIComponent(trimmed)}`)
+    } else {
+      navigate('/restaurants')
+    }
+  }
+
+  const handleTagClick = (tag) => {
+    navigate(`/restaurants?cuisine=${encodeURIComponent(tag)}`)
+  }
+
+  // Live filter featured restaurants if user types on the home page
+  const displayedFeatured = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return restaurants.slice(0, 4)
+    }
+    const q = searchQuery.toLowerCase().trim()
+    return restaurants.filter(
+      (r) =>
+        r.name?.toLowerCase().includes(q) ||
+        r.cuisine_type?.toLowerCase().includes(q) ||
+        r.description?.toLowerCase().includes(q) ||
+        r.address?.toLowerCase().includes(q)
+    )
+  }, [restaurants, searchQuery])
 
   return (
     <div>
@@ -39,9 +72,56 @@ export default function Home() {
             Discover and order from your favorite campus restaurants.
             Ultra-fast dorm delivery, seamless mock payments, and AI-powered dining analytics.
           </p>
+
+          {/* Prominent Search Bar */}
+          <div className="hero-search-box">
+            <form onSubmit={handleSearchSubmit} className="hero-search-form">
+              <div className="hero-search-input-wrapper">
+                <span className="hero-search-icon">🔍</span>
+                <input
+                  type="text"
+                  className="hero-search-input"
+                  placeholder="Search campus eateries, cuisines, or favorite dishes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search restaurants"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    className="hero-search-clear"
+                    onClick={() => setSearchQuery('')}
+                    title="Clear search"
+                    aria-label="Clear search input"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button type="submit" className="btn btn-primary hero-search-submit">
+                Find Eateries
+              </button>
+            </form>
+          </div>
+
+          {/* Quick Search Cuisines */}
+          <div className="hero-quick-tags">
+            <span className="hero-tag-label">Popular:</span>
+            {QUICK_SEARCH_TAGS.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className="hero-tag-pill"
+                onClick={() => handleTagClick(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+
           <div className="hero-actions">
             <Link to="/restaurants" className="btn btn-primary btn-lg">
-              🍽️ Browse Restaurants
+              🍽️ Browse All Restaurants
             </Link>
             <Link to="/register" className="btn btn-lg" style={{
               background: 'rgba(255, 255, 255, 0.12)',
@@ -78,31 +158,46 @@ export default function Home() {
       <section className="section" style={{ background: 'var(--bg)' }}>
         <div className="container">
           <div className="section-heading">
-            <h2>Featured Eateries</h2>
-            <p>Fresh picks from campus kitchens ready to serve hot and delicious meals</p>
+            <h2>{searchQuery.trim() ? `Search Results for "${searchQuery}"` : 'Featured Eateries'}</h2>
+            <p>
+              {searchQuery.trim()
+                ? `Showing campus eateries matching your search query`
+                : 'Fresh picks from campus kitchens ready to serve hot and delicious meals'}
+            </p>
           </div>
 
           {loading ? (
             <LoadingSpinner text="Fetching campus restaurants..." />
-          ) : featured.length === 0 ? (
+          ) : displayedFeatured.length === 0 ? (
             <div className="empty-state">
-              <span className="empty-state-icon">🏪</span>
-              <h3>No restaurants registered yet</h3>
-              <p>Sign up as an owner to register your campus eatery and publish your menu!</p>
-              <Link to="/restaurants" className="btn btn-primary">Browse All</Link>
+              <span className="empty-state-icon">🔍</span>
+              <h3>{searchQuery.trim() ? 'No matching restaurants found' : 'No restaurants registered yet'}</h3>
+              <p>
+                {searchQuery.trim()
+                  ? `No campus eateries matched "${searchQuery}". Try a different dish or view the full restaurant directory.`
+                  : 'Sign up as an owner to register your campus eatery and publish your menu!'}
+              </p>
+              <Link to="/restaurants" className="btn btn-primary">
+                Browse Full Directory
+              </Link>
             </div>
           ) : (
             <div className="grid grid-auto">
-              {featured.map((r) => (
+              {displayedFeatured.map((r) => (
                 <RestaurantCard key={r.id || r._id} restaurant={r} />
               ))}
             </div>
           )}
 
-          {featured.length > 0 && (
+          {displayedFeatured.length > 0 && (
             <div className="text-center mt-4">
-              <Link to="/restaurants" className="btn btn-outline btn-lg">
-                Explore All Campus Eateries →
+              <Link
+                to={searchQuery.trim() ? `/restaurants?search=${encodeURIComponent(searchQuery.trim())}` : '/restaurants'}
+                className="btn btn-outline btn-lg"
+              >
+                {searchQuery.trim()
+                  ? `View All Results for "${searchQuery}" in Directory →`
+                  : 'Explore All Campus Eateries →'}
               </Link>
             </div>
           )}

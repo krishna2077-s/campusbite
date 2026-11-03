@@ -50,8 +50,21 @@ export const getMe = () =>
   api.get('/auth/me')
 
 // ─── Restaurants ─────────────────────────────────────────────────────────────
-export const getRestaurants = (params) =>
-  api.get('/restaurants', { params })
+export const getRestaurants = (params) => {
+  if (typeof params === 'string') {
+    const q = params.trim()
+    return api.get('/restaurants', { params: q ? { search: q, q } : undefined })
+  }
+  if (params && typeof params === 'object') {
+    const normalized = { ...params }
+    if (normalized.search && !normalized.q) normalized.q = normalized.search
+    if (normalized.q && !normalized.search) normalized.search = normalized.q
+    if (normalized.cuisine && !normalized.cuisine_type) normalized.cuisine_type = normalized.cuisine
+    if (normalized.cuisine_type && !normalized.cuisine) normalized.cuisine = normalized.cuisine_type
+    return api.get('/restaurants', { params: normalized })
+  }
+  return api.get('/restaurants')
+}
 
 export const getRestaurant = (id) =>
   api.get(`/restaurants/${id}`)

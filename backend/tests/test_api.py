@@ -116,6 +116,58 @@ def test_restaurants_and_menu_listing():
     assert len(menu) >= 3
 
 
+def test_restaurant_search_queries():
+    # 1. Search by name using 'search' parameter
+    res = client.get("/restaurants?search=Rustic")
+    assert res.status_code == 200
+    results = res.json()
+    assert len(results) >= 1
+    assert any("Rustic" in r["name"] for r in results)
+
+    # 2. Search using 'q' alias
+    res_q = client.get("/restaurants?q=Dragon")
+    assert res_q.status_code == 200
+    results_q = res_q.json()
+    assert len(results_q) >= 1
+    assert any("Dragon" in r["name"] for r in results_q)
+
+    # 3. Filter using 'name' parameter
+    res_name = client.get("/restaurants?name=Spice")
+    assert res_name.status_code == 200
+    assert any("Spice" in r["name"] for r in res_name.json())
+
+    # 4. Filter by cuisine using 'cuisine' and 'cuisine_type'
+    res_cuisine = client.get("/restaurants?cuisine=Italian")
+    assert res_cuisine.status_code == 200
+    assert all(r["cuisine_type"].lower() == "italian" for r in res_cuisine.json())
+
+    res_ct = client.get("/restaurants?cuisine_type=Chinese")
+    assert res_ct.status_code == 200
+    assert all(r["cuisine_type"].lower() == "chinese" for r in res_ct.json())
+
+    # 5. 'All' cuisine returns all active restaurants
+    res_all = client.get("/restaurants?cuisine=All")
+    assert res_all.status_code == 200
+    assert len(res_all.json()) >= 4
+
+    # 6. Search matching a menu item dish name
+    res_dish = client.get("/restaurants?search=noodles")
+    assert res_dish.status_code == 200
+    dish_results = res_dish.json()
+    assert len(dish_results) >= 1
+    assert any("Dragon" in r["name"] for r in dish_results)
+
+    # 7. Non-existent search returns empty list
+    res_empty = client.get("/restaurants?search=nonexistentfooddish12345")
+    assert res_empty.status_code == 200
+    assert res_empty.json() == []
+
+    # 8. Mismatched search and cuisine returns empty
+    res_mismatch = client.get("/restaurants?search=pizza&cuisine=Chinese")
+    assert res_mismatch.status_code == 200
+    assert res_mismatch.json() == []
+
+
 def test_order_placement_and_lifecycle():
     # Login as student
     student_login = client.post("/auth/login", json={"email": "student@campusbite.com", "password": "password123"})
