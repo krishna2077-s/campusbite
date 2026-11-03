@@ -12,6 +12,16 @@
 
 ---
 
+## 🌐 Live Production Links
+
+| Service | Environment | Status | Link |
+|---|---|:---:|---|
+| **Frontend Web App** | Render Static Site | 🟢 **Live** | [https://campusbite-frontend-7evx.onrender.com](https://campusbite-frontend-7evx.onrender.com) |
+| **Backend API Docs** | Render Web Service | 🟢 **Live** | [https://campusbite-backend-t5bq.onrender.com/docs](https://campusbite-backend-t5bq.onrender.com/docs) |
+| **Backend Health Check** | Render Web Service | 🟢 **Live** | [https://campusbite-backend-t5bq.onrender.com/health](https://campusbite-backend-t5bq.onrender.com/health) |
+
+---
+
 ## 🚀 Live Deployment on Render
 
 Deploy both the backend and frontend in one click using Render Blueprint:
