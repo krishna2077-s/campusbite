@@ -1,12 +1,29 @@
 # 🍔 CampusBite – Restaurant Ordering & Delivery Platform
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/krishna2077-s/campusbite)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB.svg?style=flat&logo=react)](https://react.dev)
+[![Render](https://img.shields.io/badge/Deploy-Render-46E3B7.svg?style=flat&logo=render)](https://render.com)
 [![Docker](https://img.shields.io/badge/Container-Docker-2496ED.svg?style=flat&logo=docker)](https://www.docker.com/)
 [![SQLite](https://img.shields.io/badge/Database-SQLAlchemy%20%2B%20SQLite-003B57.svg?style=flat&logo=sqlite)](https://www.sqlite.org/)
 [![OpenAI](https://img.shields.io/badge/AI-OpenAI%20API-412991.svg?style=flat&logo=openai)](https://openai.com/)
 
 **CampusBite** is a full-stack, enterprise-grade restaurant ordering and delivery application tailored for campus environments. Built with a modern **React.js** single-page application frontend and a high-performance **FastAPI** backend with **SQLAlchemy ORM**, **JWT Authentication**, containerized with **Docker**, and powered by **OpenAI** for intelligent order history insights.
+
+---
+
+## 🚀 Live Deployment on Render
+
+Deploy both the backend and frontend in one click using Render Blueprint:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/krishna2077-s/campusbite)
+
+### How Render Deployment Works:
+1. **Infrastructure as Code**: The included [`render.yaml`](./render.yaml) automatically provisions:
+   - **`campusbite-backend`**: Python web service running FastAPI on Uvicorn (`/health` health checks enabled).
+   - **`campusbite-frontend`**: High-speed Static Site running React + Vite with SPA fallback rewrites (`/* -> /index.html`).
+2. **Auto-linking**: Render binds the backend URL to the frontend's `VITE_API_BASE_URL` environment variable at build time.
+3. **Continuous Deployment**: Every push to `main` on GitHub triggers an automatic zero-downtime deployment on Render.
 
 ---
 
