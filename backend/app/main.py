@@ -49,6 +49,7 @@ app.include_router(payments.router)
 app.include_router(refunds.router)
 app.include_router(ai_insights.router)
 app.include_router(stats.router)
+app.include_router(stats.owner_router)
 
 
 # ── Startup / shutdown ────────────────────────────────────────────────────────

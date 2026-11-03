@@ -84,7 +84,7 @@ def delete_menu_item(
 
 
 @router.patch("/menu/{item_id}/availability", response_model=MenuItemOut)
-def toggle_availability(
+def update_availability(
     item_id: int,
     availability: MenuItemAvailability,
     current_user: User = Depends(get_current_owner),
@@ -92,6 +92,19 @@ def toggle_availability(
 ):
     item = _get_item_for_owner(item_id, current_user, db)
     item.is_available = availability.is_available
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.patch("/menu/{item_id}/toggle", response_model=MenuItemOut)
+def toggle_menu_item(
+    item_id: int,
+    current_user: User = Depends(get_current_owner),
+    db: Session = Depends(get_db),
+):
+    item = _get_item_for_owner(item_id, current_user, db)
+    item.is_available = not bool(item.is_available)
     db.commit()
     db.refresh(item)
     return item

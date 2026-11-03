@@ -14,9 +14,11 @@ from app.models.user import User
 from app.utils.dependencies import get_current_owner
 
 router = APIRouter(prefix="/stats", tags=["stats"])
+owner_router = APIRouter(prefix="/owner", tags=["owner"])
 
 
 @router.get("/restaurant", response_model=Dict[str, Any])
+@router.get("/stats", response_model=Dict[str, Any])
 def get_restaurant_stats(
     current_user: User = Depends(get_current_owner),
     db: Session = Depends(get_db),
@@ -91,3 +93,11 @@ def get_restaurant_stats(
         "pending_orders": pending_orders,
         "top_dishes": top_dishes,
     }
+
+
+@owner_router.get("/stats", response_model=Dict[str, Any])
+def get_owner_stats_alias(
+    current_user: User = Depends(get_current_owner),
+    db: Session = Depends(get_db),
+):
+    return get_restaurant_stats(current_user=current_user, db=db)

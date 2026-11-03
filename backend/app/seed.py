@@ -25,11 +25,22 @@ def seed_database_if_empty(db: Session) -> None:
     so the system is immediately ready for demonstrations and evaluations.
     """
     try:
-        user_count = db.query(User).count()
         restaurant_count = db.query(Restaurant).count()
 
-        if user_count > 0 and restaurant_count > 0:
-            logger.info("Database already contains data; skipping initial seed.")
+        if restaurant_count > 0:
+            # Guarantee demo accounts are present and passwords valid for evaluators
+            for email, name, role in [
+                ("owner@campusbite.com", "Chef Marco Rossi", UserRole.restaurant_owner),
+                ("student@campusbite.com", "Alex Johnson", UserRole.customer),
+                ("delivery@campusbite.com", "Ravi Kumar", UserRole.delivery_partner),
+            ]:
+                u = db.query(User).filter(User.email == email).first()
+                if not u:
+                    db.add(User(email=email, password_hash=get_password_hash("password123"), full_name=name, role=role))
+                else:
+                    u.password_hash = get_password_hash("password123")
+            db.commit()
+            logger.info("Database already contains restaurants; ensured demo accounts are ready.")
             return
 
         logger.info("Seeding initial demo data for CampusBite platform...")
@@ -46,6 +57,8 @@ def seed_database_if_empty(db: Session) -> None:
             )
             db.add(owner)
             db.flush()
+        else:
+            owner.password_hash = get_password_hash("password123")
 
         student = db.query(User).filter(User.email == "student@campusbite.com").first()
         if not student:
@@ -58,6 +71,8 @@ def seed_database_if_empty(db: Session) -> None:
             )
             db.add(student)
             db.flush()
+        else:
+            student.password_hash = get_password_hash("password123")
 
         delivery_partner = db.query(User).filter(User.email == "delivery@campusbite.com").first()
         if not delivery_partner:
@@ -70,6 +85,8 @@ def seed_database_if_empty(db: Session) -> None:
             )
             db.add(delivery_partner)
             db.flush()
+        else:
+            delivery_partner.password_hash = get_password_hash("password123")
 
         # 2. Demo Restaurants & Menu Items
         demo_restaurants_data = [

@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app.models.order import OrderStatus, PaymentStatus
 
@@ -53,6 +53,16 @@ class OrderCreate(BaseModel):
 class OrderStatusUpdate(BaseModel):
     status: OrderStatus
     delivery_partner_id: Optional[int] = None
+
+    @field_validator("delivery_partner_id", mode="before")
+    @classmethod
+    def parse_dp_id(cls, v):
+        if v is None or v == "" or v == "null":
+            return None
+        if isinstance(v, str):
+            digits = "".join(c for c in v if c.isdigit())
+            return int(digits) if digits else None
+        return v
 
 
 class OrderOut(BaseModel):

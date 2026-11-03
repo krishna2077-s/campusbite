@@ -1,16 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { getOrders, updateOrderStatus, getRefunds, updateRefund } from '../api/api'
+import { getOrders, updateOrderStatus, getRefunds, updateRefund, getDeliveryPartners } from '../api/api'
 import OrderCard from '../components/OrderCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const STATUS_FILTERS = ['All', 'PLACED', 'ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']
 const PAGE_SIZE = 10
 
-// Mock delivery partners — in production, fetch from API
-const MOCK_DELIVERY_PARTNERS = [
-  { id: 'dp1', name: 'Ravi Kumar' },
-  { id: 'dp2', name: 'Priya Singh' },
-  { id: 'dp3', name: 'Anand Mehta' },
+const DEFAULT_DELIVERY_PARTNERS = [
+  { id: 3, name: 'Ravi Kumar (Campus Fleet)' },
 ]
 
 export default function OrderManagement() {
@@ -20,7 +17,7 @@ export default function OrderManagement() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [error, setError] = useState('')
-  const [deliveryPartners] = useState(MOCK_DELIVERY_PARTNERS)
+  const [deliveryPartners, setDeliveryPartners] = useState(DEFAULT_DELIVERY_PARTNERS)
   const [refundOrders, setRefundOrders] = useState([])
 
   const fetchOrders = useCallback(() => {
@@ -48,6 +45,14 @@ export default function OrderManagement() {
   useEffect(() => {
     fetchOrders()
     fetchRefunds()
+    getDeliveryPartners()
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : []
+        if (list.length > 0) {
+          setDeliveryPartners(list.map(dp => ({ id: dp.id, name: dp.full_name || dp.email })))
+        }
+      })
+      .catch(() => {})
   }, [fetchOrders, fetchRefunds])
 
   const handleStatusUpdate = async (orderId, newStatus) => {
@@ -61,7 +66,8 @@ export default function OrderManagement() {
 
   const handleAssignDelivery = async (orderId, partnerId) => {
     try {
-      await updateOrderStatus(orderId, { status: 'ASSIGNED', delivery_partner_id: partnerId })
+      const pid = partnerId ? Number(String(partnerId).replace(/\D/g, '')) || partnerId : null
+      await updateOrderStatus(orderId, { status: 'ASSIGNED', delivery_partner_id: pid })
       fetchOrders()
     } catch (e) {
       alert(e.response?.data?.detail || 'Failed to assign delivery')

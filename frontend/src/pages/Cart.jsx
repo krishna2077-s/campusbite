@@ -20,6 +20,7 @@ export default function Cart() {
   const [cart, setCart] = useState(getCart())
   const [address, setAddress] = useState('')
   const [addressError, setAddressError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('meal_plan')
   const [placing, setPlacing] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(null)
   const [error, setError] = useState('')
@@ -126,6 +127,12 @@ export default function Cart() {
               <span style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>Total</span>
               <strong>₹{Number(orderSuccess.total_amount || total).toFixed(2)}</strong>
             </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>Payment</span>
+              <strong style={{ fontSize: '0.85rem', color: 'var(--accent-dark)' }}>
+                {paymentMethod === 'meal_plan' ? '🎓 Campus Meal Plan (Authorized)' : paymentMethod === 'card' ? '💳 Mock Card (Approved)' : '💵 Cash on Delivery'}
+              </strong>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>Status</span>
               <span className="badge badge-PLACED">Placed</span>
@@ -191,14 +198,22 @@ export default function Cart() {
 
             {/* Delivery Address */}
             <div className="card mt-2">
-              <div className="card-header">
+              <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1rem' }}>📍 Delivery Address</h3>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-ghost"
+                  style={{ fontSize: '0.78rem', padding: '4px 8px', color: 'var(--primary)' }}
+                  onClick={() => { setAddress('Room 402, Oak Residence Hall, Campus North'); setAddressError('') }}
+                >
+                  📍 Fill Demo Dorm
+                </button>
               </div>
               <div className="card-body">
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <textarea
                     className={`form-control ${addressError ? 'error' : ''}`}
-                    placeholder="Enter your full delivery address (dorm name, room number, landmark...)"
+                    placeholder="Enter your full delivery address (e.g., Room 402, Oak Residence Hall, Campus North)..."
                     value={address}
                     onChange={(e) => { setAddress(e.target.value); setAddressError('') }}
                     rows={3}
@@ -208,10 +223,45 @@ export default function Cart() {
               </div>
             </div>
 
-            {/* Payment Note */}
-            <div className="alert alert-info mt-2">
-              <span>💳</span>
-              <span>Payment will be processed on delivery. This is a demo payment flow.</span>
+            {/* Payment Method Selector */}
+            <div className="card mt-2">
+              <div className="card-header">
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>💳 Payment Method (Sandbox / Mock)</h3>
+              </div>
+              <div className="card-body">
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {[
+                    { id: 'meal_plan', title: '🎓 Campus Meal Plan / Student Card', desc: 'Instant authorization with student balance (Mock)' },
+                    { id: 'card', title: '💳 Credit / Debit Card (Sandbox)', desc: 'Test mock checkout with zero real charges' },
+                    { id: 'cash', title: '💵 Cash on Campus Delivery', desc: 'Pay delivery partner directly at your dorm' },
+                  ].map(m => (
+                    <label key={m.id} style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12,
+                      padding: '12px 16px',
+                      border: `2px solid ${paymentMethod === m.id ? 'var(--primary)' : 'var(--gray-200)'}`,
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      background: paymentMethod === m.id ? 'var(--primary-subtle)' : 'var(--white)',
+                      transition: 'var(--transition)',
+                    }}>
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value={m.id}
+                        checked={paymentMethod === m.id}
+                        onChange={() => setPaymentMethod(m.id)}
+                        style={{ accentColor: 'var(--primary)', marginTop: 3 }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--secondary)' }}>{m.title}</div>
+                        <div style={{ fontSize: '0.82rem', color: 'var(--gray-500)' }}>{m.desc}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {error && <div className="alert alert-error mt-2">{error}</div>}

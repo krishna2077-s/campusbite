@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.order import Order, OrderStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.order import OrderOut, OrderStatusUpdate
+from app.schemas.user import UserOut
 from app.utils.dependencies import get_current_delivery_partner
 
 router = APIRouter(prefix="/delivery", tags=["delivery"])
@@ -17,6 +18,11 @@ DELIVERY_TRANSITIONS = {
     OrderStatus.ASSIGNED: [OrderStatus.OUT_FOR_DELIVERY],
     OrderStatus.OUT_FOR_DELIVERY: [OrderStatus.DELIVERED],
 }
+
+
+@router.get("/partners", response_model=List[UserOut])
+def list_delivery_partners(db: Session = Depends(get_db)):
+    return db.query(User).filter(User.role == UserRole.delivery_partner).all()
 
 
 @router.get("/orders", response_model=List[OrderOut])

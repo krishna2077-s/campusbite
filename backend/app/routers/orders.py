@@ -125,6 +125,7 @@ def list_orders(current_user: User = Depends(get_current_user), db: Session = De
 
 
 @router.get("/owner/reminders", response_model=List[ReminderOut])
+@router.get("/reminders", response_model=List[ReminderOut])
 def get_owner_reminders(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.role != UserRole.restaurant_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Restaurant owner access required")
@@ -195,20 +196,26 @@ def update_order_status(
                 detail=f"Cannot transition from {order.status.value} to {new_status.value} as owner",
             )
         if new_status == OrderStatus.ASSIGNED:
-            if not update.delivery_partner_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="delivery_partner_id required when assigning order",
-                )
-            partner = db.query(User).filter(
-                User.id == update.delivery_partner_id,
-                User.role == UserRole.delivery_partner,
-            ).first()
-            if not partner:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Delivery partner not found"
-                )
-            order.delivery_partner_id = update.delivery_partner_id
+            partner_id = update.delivery_partner_id
+            if not partner_id:
+                default_dp = db.query(User).filter(User.role == UserRole.delivery_partner).first()
+                if default_dp:
+                    partner_id = default_dp.id
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="delivery_partner_id required when assigning order",
+                    )
+            else:
+                partner = db.query(User).filter(
+                    User.id == partner_id,
+                    User.role == UserRole.delivery_partner,
+                ).first()
+                if not partner:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND, detail="Delivery partner not found"
+                    )
+            order.delivery_partner_id = partner_id
 
     elif current_user.role == UserRole.delivery_partner:
         if order.delivery_partner_id != current_user.id:

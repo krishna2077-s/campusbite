@@ -92,11 +92,14 @@ export const updateOrderStatus = (id, data) =>
   api.patch(`/orders/${id}/status`, data)
 
 export const getReminders = () =>
-  api.get('/orders/reminders')
+  api.get('/orders/owner/reminders').catch(() => api.get('/orders/reminders'))
 
 // ─── Delivery ─────────────────────────────────────────────────────────────────
 export const getDeliveryOrders = () =>
   api.get('/delivery/orders')
+
+export const getDeliveryPartners = () =>
+  api.get('/delivery/partners')
 
 export const updateDeliveryStatus = (id, data) =>
   api.patch(`/delivery/orders/${id}/status`, data)
@@ -128,6 +131,6 @@ export const getInsights = (query) =>
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 export const getRestaurantStats = () =>
-  api.get('/owner/stats')
+  api.get('/stats/restaurant').catch(() => api.get('/owner/stats'))
 
 export default api

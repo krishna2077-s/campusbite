@@ -15,7 +15,17 @@ export default function Navbar() {
   const { isAuthenticated, user, isCustomer, isOwner, isDeliveryPartner, logout } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-  const cartCount = getCartCount()
+  const [cartCount, setCartCount] = useState(getCartCount())
+
+  React.useEffect(() => {
+    const updateCount = () => setCartCount(getCartCount())
+    window.addEventListener('cart-updated', updateCount)
+    window.addEventListener('storage', updateCount)
+    return () => {
+      window.removeEventListener('cart-updated', updateCount)
+      window.removeEventListener('storage', updateCount)
+    }
+  }, [])
 
   const handleLogout = () => {
     logout()
