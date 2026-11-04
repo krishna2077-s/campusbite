@@ -20,14 +20,25 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    getRestaurants()
-      .then((res) => {
-        const data = res.data
-        const list = Array.isArray(data) ? data : data.results || data.restaurants || []
-        setRestaurants(list)
-      })
-      .catch(() => setRestaurants([]))
-      .finally(() => setLoading(false))
+    let attempts = 0
+    const load = () => {
+      getRestaurants()
+        .then((res) => {
+          const data = res.data
+          const list = Array.isArray(data) ? data : data.results || data.restaurants || []
+          setRestaurants(list)
+        })
+        .catch(() => {
+          if (attempts < 1) {
+            attempts++
+            setTimeout(load, 3000)
+          } else {
+            setRestaurants([])
+          }
+        })
+        .finally(() => setLoading(false))
+    }
+    load()
   }, [])
 
   const handleSearchSubmit = (e) => {

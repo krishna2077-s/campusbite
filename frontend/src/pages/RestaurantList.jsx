@@ -41,31 +41,38 @@ export default function RestaurantList() {
 
   const abortControllerRef = useRef(null)
 
-  // Fetch full restaurant catalog (with menu_items) on mount
-  useEffect(() => {
-    let isMounted = true
+  const fetchCatalog = (isRetry = false) => {
     setLoading(true)
+    setError('')
 
     getRestaurants()
       .then((res) => {
-        if (!isMounted) return
         const data = res.data
         const list = Array.isArray(data)
           ? data
           : data.results || data.restaurants || []
         setAllRestaurants(list)
+        setError('')
       })
-      .catch(() => {
-        if (!isMounted) return
-        setError('Failed to load restaurants. Please try again.')
+      .catch((err) => {
+        console.error('Failed to load restaurants:', err)
+        if (!isRetry) {
+          setError('Server is warming up... retrying automatically in 3s.')
+          setTimeout(() => {
+            fetchCatalog(true)
+          }, 3000)
+        } else {
+          setError('Failed to connect to backend server. If the server is waking up, please click Retry below.')
+        }
       })
       .finally(() => {
-        if (isMounted) setLoading(false)
+        setLoading(false)
       })
+  }
 
-    return () => {
-      isMounted = false
-    }
+  // Fetch full restaurant catalog (with menu_items) on mount
+  useEffect(() => {
+    fetchCatalog(false)
   }, [])
 
   // Sync state if URL search parameters change externally (e.g. browser back/forward)
@@ -319,7 +326,21 @@ export default function RestaurantList() {
         })}
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && (
+        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', padding: '12px 16px' }}>
+          <div>
+            <strong>⚠️ Server Connection:</strong> {error}
+          </div>
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            onClick={() => fetchCatalog(true)}
+            style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+          >
+            🔄 Retry Connection
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <LoadingSpinner text="Loading campus restaurants..." />

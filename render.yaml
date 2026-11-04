@@ -39,7 +39,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: campusbite-backend
-          property: host
+        value: https://campusbite-backend-t5bq.onrender.com

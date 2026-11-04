@@ -1,6 +1,12 @@
 import axios from 'axios'
 
-const envUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+let envUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+
+// If Render passes an internal host slug without a TLD (e.g. "campusbite-backend-t5bq")
+if (envUrl && !envUrl.includes('.') && !envUrl.includes('localhost')) {
+  envUrl = `${envUrl}.onrender.com`
+}
+
 const baseURL = envUrl.startsWith('http://') || envUrl.startsWith('https://')
   ? envUrl
   : `https://${envUrl}`
